@@ -31,6 +31,14 @@ then
     s3fs ${COS_BUCKET_PRIVATE} ${PATH_COS}/s3_${COS_BUCKET_PRIVATE} -o url=${URL_COS_PRIVATE} -o passwd_file=${PATH_PASSWORD} -o ibm_iam_auth
 fi
 
+# Copy the dockertest repo to the local /workspace
+mkdir -p ${PATH_DOCKERTEST}
+cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/dockertest ${PATH_DOCKERTEST}/dockertest
+
+# Get the docker-ce packages
+mkdir /workspace/docker-ce-${DOCKER_VERS}_${DATE}
+cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/build-docker-${DOCKER_VERS}_${DATE}/docker-ce-${DOCKER_VERS}/* /workspace/docker-ce-${DOCKER_VERS}_${DATE}
+
 # Get the containerd packages if CONTAINERD_BUILD=0
 if [[ ${CONTAINERD_BUILD} = "0" ]]
 then
@@ -41,18 +49,30 @@ else
     echo "CONTAINERD_BUILD is set to 1"
 fi
 
+# Check if we have the dockertest
+if ! test -d ${PATH_DOCKERTEST}/dockertest
+then
+    echo "The dockertest directory has not been copied."
+    exit 1
+fi
+
+# Check if we have the docker packages
+if ! test -d /workspace/docker-ce-${DOCKER_VERS}_${DATE}
+then
+    echo "The docker packages have not been copied."
+    exit 1
+fi
+
 # Check if we have the containerd packages if CONTAINERD_BUILD is 0
 if [[ ${CONTAINERD_BUILD} = "0" ]]
 then
     if test -d /workspace/containerd-${CONTAINERD_VERS}
     then
         echo "The containerd packages have been copied."
-        exit 0
     else
         echo "The containerd packages have not been copied."
         exit 1
     fi
 else
     echo "The dockertest directory has been copied."
-    exit 0
 fi

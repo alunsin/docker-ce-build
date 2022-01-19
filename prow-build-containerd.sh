@@ -6,8 +6,6 @@ set -u
 SECONDS=0
 PATH_SCRIPTS="/home/prow/go/src/github.com/ppc64le-cloud/docker-ce-build"
 
-echo DATE=\"${DATE}\" 2>&1 | tee ${PATH_SCRIPTS}/env/containerd.list
-
 if [[ -z ${ARTIFACTS} ]]
 then
     ARTIFACTS=/logs/artifacts
@@ -35,6 +33,7 @@ else
     echo "** Set up (env files) **"
     ${PATH_SCRIPTS}/get-env.sh
     ${PATH_SCRIPTS}/get-env-containerd.sh
+    ${PATH_SCRIPTS}/get-env-test.sh
 
     set -o allexport
     source env.list
@@ -47,26 +46,31 @@ else
     exit_code_build=`echo $?`
     echo "Exit code build : ${exit_code_build}"
 
+    # Test the packages
+    echo "*** * Tests * ***"
+    ${PATH_SCRIPTS}/test.sh
+
+    # Check if there are errors in the tests : NOERR or ERR
+    echo "*** ** Tests check ** ***"
+    ${PATH_SCRIPTS}/check-tests.sh
+    CHECK_TESTS_BOOL=`echo $?`
+    echo "Exit code check : ${CHECK_TESTS_BOOL}"
+    echo "The tests results : ${CHECK_TESTS_BOOL}"
+    export CHECK_TESTS_BOOL
+
     duration=$SECONDS
     echo "DURATION ALL : $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 
-    if [[ ${exit_code_build} -eq 0 ]]
+    # Push to the COS Bucket according to CHECK_TESTS_BOOL
+    echo "*** *** Push to the COS Buckets *** ***"
+    ${PATH_SCRIPTS}/push-COS.sh
+
+    if [[ ${CHECK_TESTS_BOOL} -eq 0 ]]
     then
-        echo "Build containerd successful"
-        cd ${PATH_SCRIPTS}
-        git add . && git commit -m "New build containerd ${CONTAINERD_VERS}" && git push
-        exit_code_git=`echo $?`
-        echo "Exit code prow-build-containerd.sh : ${exit_code_git}"
-        if [[ ${exit_code_git} -eq 0 ]]
-        then
-            echo "Git push successful"
-            exit 0
-        else
-            echo "Git push not successful"
-            exit 1
-        fi
+        echo "NO ERROR"
+        exit 0
     else
-        echo "Build containerd not successful"
+        echo "ERROR"
         exit 1
     fi
 fi

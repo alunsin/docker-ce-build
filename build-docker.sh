@@ -137,17 +137,6 @@ echo "= Building static binaries ="
 
 before_build=$SECONDS
 
-# Cloning docker-ce-packaging
-mkdir docker-ce-packaging
-pushd docker-ce-packaging
-git init
-git remote add origin https://github.com/docker/docker-ce-packaging.git
-git fetch origin ${DOCKER_PACKAGING_REF}
-git checkout FETCH_HEAD
-
-make REF=${DOCKER_VERS} checkout
-popd
-
 cd /workspace/docker-ce-packaging/static
 
 CONT_NAME=docker-build-static
