@@ -11,7 +11,7 @@ URL_COS_PRIVATE="https://s3.us-south.cloud-object-storage.appdomain.cloud"
 
 FILE_DATE="${PATH_SCRIPTS}/env/date.list"
 
-PATH_DOCKERTEST=""
+PATH_DOCKERTEST="/workspace/test/src/github.ibm.com/powercloud"
 
 # Copy the date file
 cp ${FILE_DATE} /workspace/date.list

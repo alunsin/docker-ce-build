@@ -33,7 +33,6 @@ else
     echo "** Set up (env files) **"
     ${PATH_SCRIPTS}/get-env.sh
     ${PATH_SCRIPTS}/get-env-containerd.sh
-    ${PATH_SCRIPTS}/get-env-test.sh
 
     set -o allexport
     source env.list
