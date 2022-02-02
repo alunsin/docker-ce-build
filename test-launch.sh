@@ -4,7 +4,7 @@
 set -eu
 
 # Start the dockerd and wait for it to start
-source ${PATH_SCRIPTS}/dockerd-starting.sh
+${PATH_SCRIPTS}/dockerctl.sh start
 
 # Run the docker test suite that consists of 3 tests
 echo "= Docker test suite for ${DISTRO_NAME} ="

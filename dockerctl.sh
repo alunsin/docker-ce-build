@@ -1,6 +1,6 @@
 #!/bin/bash
 DAEMON="dockerd"
-    
+
 case "${1}" in
   start)
     # Call dockerd-entrypoint to start dockerd, then check that dockerd has started
