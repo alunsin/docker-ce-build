@@ -4,7 +4,7 @@ set -u
 
 # Path to the scripts
 SECONDS=0
-PATH_SCRIPTS="/home/prow/go/src/github.com/ppc64le-cloud/docker-ce-build"
+PATH_SCRIPTS="/home/prow/go/src/github.com/${REPO_OWNER}/${REPO_NAME}"
 DATE=`date +%d%m%y-%H%M`
 
 echo DATE=\"${DATE}\" 2>&1 | tee ${PATH_SCRIPTS}/env/date.list
