@@ -38,7 +38,7 @@ case "${1}" in
   stop)
     /usr/bin/pkill ${DAEMON}
     sleep 10
-    while /usr/bin/pgrep ${DAEMON}
+    while /usr/bin/pgrep ${DAEMON} && ! ps -e | grep ${DAEMON} | grep -q defunct
     do
         /usr/bin/pkill -9 ${DAEMON}
         sleep 5
