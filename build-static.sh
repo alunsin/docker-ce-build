@@ -6,7 +6,7 @@ set -u
 set -o allexport
 source env.list
 
-source ${PATH_SCRIPTS}/dockerd-starting.sh
+${PATH_SCRIPTS}/dockerctl.sh start
 
 DIR_LOGS="/workspace/logs"
 STATIC_LOG="static.log"

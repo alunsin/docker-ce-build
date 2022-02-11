@@ -12,7 +12,7 @@ At the beginning, there was only one periodic prow job. However, it was taking t
 For the moment, it is a semi-automated process, since we still need to manually edit the env.list file with the versions and the hash commits.
 
 The prow job was then split into two postsubmit prow jobs. 
-- First prow job : [postsubmit-build-docker.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml)
+1. First prow job : [postsubmit-build-docker.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml)
 
 This postsubmit prow job is triggered by the editing of the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list). This file contains the information we need to build the packages : 
 - DOCKER_VERS : latest version of docker, that we want to build
@@ -22,37 +22,39 @@ This postsubmit prow job is triggered by the editing of the [env.list](https://g
 - CONTAINERD_PACKAGING_REF : commit associated to the latest version of containerd
 - RUNC_VERS : runc version used to build the static packages
 
-This prow job builds the dynamic docker packages and then pushes them to our internal COS bucket, before editing this file [date.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/date.list) with the date. We use the date in the directory where we store the docker packages in the COS bucket, so that we don't confuse the different builds.
+This prow job builds the dynamic docker packages and then pushes them to our internal COS bucket, before editing this file [date.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/date.list) with the date. We use the date in the directory where we store the docker packages in the COS bucket, so that we don't confuse the different builds.
 
-1. [Start the docker daemon]()
-2. [Access to the internal COS Bucket and set up the environmental variables]()
-3. [Build the dynamic docker packages]()
-4. [Push to the github repository the date.list file]()
+1. [Start the docker daemon](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L20:L22)
+2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L29:L34)
+3. [Build the dynamic and static docker packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L36:L40)
+4. [Push to the github repository the date.list file](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L48:L49)
 
-- Second prow job : [postsubmit-build-container.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-containerd.yaml)
+2. Second prow job : [postsubmit-build-container.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-containerd.yaml)
 
-This postsubmit prow job is triggered by the editing of the [date.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/date.list), which was edited at the end of the first prow job.
+This postsubmit prow job is triggered by the editing of the [date.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/date.list), which was edited at the end of the first prow job.
 This prow job builds the dynamic containerd packages (if CONTAINERD_BUILD is set to 1 in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list)), the static packages, and tests all packages.
 
-1. [Start the docker daemon]()
-2. [Access to the internal COS Bucket and set up the environmental variables]()
-3. [Get the dockertest and containerd directories (if we have already built the latest containerd version) from the COS bucket]
-4. [Build the dynamic containerd packages (if we have not already built the latest containerd version) and the static packages]()
-5. [Test the dynamic and static packages]()
-6. [Push to the COS bucket shared with the Docker team the docker and containerd packages]()
+1. [Start the docker daemon](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L23:L25)
+2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L34)
+3. [Get the dockertest and containerd directories if CONTAINERD_BUILD=0 from the COS bucket](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L35)
+4. [Build the dynamic containerd packages if CONTAINERD_BUILD=1 and the static packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L42:L46)
+5. [Test the dynamic and static packages and check if there are any errors](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L48:L58)
+6. [Push to the COS bucket shared with the Docker team the docker and containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L63:L65)
 
 ### The 8 scripts in detail
 
-- [dockerd-starting.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/dockerd-starting.sh)
+- [dockerctl.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/dockerctl.sh)
+**Usage**: dockerctl [start] | [stop]
 
+Start or Stop the dockerd daemon.
 This script runs the **dockerd-entrypoint.sh** in the background and then checks if the docker daemon has started and is running. We specify the MTU. See the reason [here](https://sylwit.medium.com/how-we-spent-a-full-day-figuring-out-a-mtu-issue-with-docker-4d81fdfe2caf).
 
 - [get-env.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/get-env.sh)
 
 This script mounts the internal COS bucket for further uses.
-It clones the [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) using the hash commit specified in the [env.list](https://github.com/florencepascual/docker-ce-build/blob/feature-optimising-builds-task/env/env.list) and gets the list of distributions in the **env-distrib.list**.
+It clones the [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) using the hash commit specified in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list) and gets the list of distributions in the **env-distrib.list**.
 
-- [get-dockertest.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/get-dockertest.sh)
+- [get-env-containerd.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/get-env-containerd.sh)
 
 This script mounts the internal COS bucket, if it has not already been mounted.
 It gets the dockertest directory from the COS bucket. 
@@ -66,7 +68,7 @@ After each package successfully built, we push the package to our internal COS b
 
 - [build-containerd.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/get-build-containerd.sh)
 
-This script builds the version of the dynamic docker packages, which is specified in the [env.list](https://github.com/florencepascual/docker-ce-build/blob/feature-optimising-builds-task/env/env.list) and the static packages. As already mentionned, it only builds the containerd packages if CONTAINERD_BUILD is set to 1. 
+This script builds the version of the dynamic docker packages, which is specified in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list) and the static packages. As already mentionned, it only builds the containerd packages if CONTAINERD_BUILD is set to 1. 
 We cannot build the packages in parallel, due to a ``git`` command in the Makefile.
 As for the **build-docker.sh**, the packages are pushed to the internal COS bucket.
 
@@ -130,16 +132,17 @@ kubectl create secret generic docker-token \
     --from-file=.dockerconfigjson=$HOME/.docker/config.json \
     --type=kubernetes.io/dockerconfigjson
 ```
-Add the following to **secret-s3.yaml**, with the secret :
+Template of secret for the **secret-s3.yaml** and the **git-credentials** (the latter only for tests), you just need to add the password in base64.
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: docker-s3-credentials
+  name: #add name
 type: Opaque
 data:
-  password:
+  password: #add password in base64
 ```
+
 ```bash
 kubectl apply -f secret-s3.yaml
 ```
@@ -204,7 +207,7 @@ Explanations :
 
 ### Run the scripts
 
-Run **prow-build-docker.sh** or **prow-build-container.sh** except for the line calling **dockerd-starting.sh**. The **dockerd-entrypoint.sh** script has already been called as entrypoint of the pod, so it should not be called a second time.
+Run **prow-build-docker.sh** or **prow-build-container.sh** except for the line calling **dockerctl.sh**. The **dockerd-entrypoint.sh** script has already been called as entrypoint of the pod, so it should not be called a second time.
 
 ## How to test the whole prow job on a cluster
 
@@ -232,8 +235,6 @@ On either of these machines, where the ppc64le cluster is running, configure the
 ### Run the prow job on a x86 machine
 On the x86 machine :
 ```bash
-# Get the ppc64le-cloud/test-infra repository
-git clone https://github.com/florencepascual/test-infra.git
 # Set CONFIG_PATH and JOB_CONFIG_PATH with an absolute path
 export CONFIG_PATH="$(pwd)/test-infra/config/prow/config.yaml"
 export JOB_CONFIG_PATH="$(pwd)/test-infra/config/jobs/periodic/docker-in-docker/periodic-build-docker.yaml"
@@ -245,4 +246,5 @@ export JOB_CONFIG_PATH="$(pwd)/test-infra/config/jobs/periodic/docker-in-docker/
 
 - If you don't need it and you are asked about **Volume "ssh-keys-bot-ssh-secret"**, answer empty, or you can remove these lines from the [config.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/prow/config.yaml#L77:L78).
 - In the [test-pj.sh](https://github.com/ppc64le-cloud/test-infra/blob/master/hack/test-pj.sh#L16), the **--local** flag specifies the local directory in which the logs will be stored. If you want it to be pushed to a COS bucket or if you want the logs to be displayed in the UI, you need to remove the **--local** flag and the directory specified afterwards.
-- The [prow UI](https://prow.ppc64le-cloud.org/)
+- Namespace : test-pods (namespace where to test the prow jobs)
+- The [prow UI](https://prow.ppc64le-cloud.org/) and the [job-history of my prow job postsubmit-build-docker](https://prow.ppc64le-cloud.org/job-history/s3/prow-logs/logs/postsubmit-build-docker)
