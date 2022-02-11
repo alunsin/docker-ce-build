@@ -31,7 +31,7 @@ source env.list
 # Build dynamic docker packages
 echo "*** Build ***"
 ${PATH_SCRIPTS}/build-docker.sh
-exit_code_build=`echo $?`
+exit_code_build=$?
 echo "Exit code build : ${exit_code_build}"
 
 duration=$SECONDS
@@ -41,22 +41,23 @@ echo "DURATION ALL : $(($duration / 60)) minutes and $(($duration % 60)) seconds
 echo "* Stopping dockerd *"
 ${PATH_SCRIPTS}/dockerctl.sh stop
 
-if [[ ${exit_code_build} -eq 0 ]]
+if [[ ${exit_code_build} -ne 0 ]]
 then
-    echo "Build docker successful"
-    cd ${PATH_SCRIPTS}
-    git add . && git commit -m "New build docker ${DOCKER_VERS}" && git push
-    exit_code_git=`echo $?`
-    echo "Exit code prow-build-docker.sh : ${exit_code_git}"
-    if [[ ${exit_code_git} -eq 0 ]]
-    then
-        echo "Git push successful"
-        exit 0
-    else
-        echo "Git push not successful"
-        exit 1
-    fi
-else
-    echo "Build docker not successful"
+    echo "Docker build failed (${exit_code_build})"
     exit 1
+fi
+
+
+echo "Triggering the next prow job using git commit"
+TRACKING_REPO=${REPO_OWNER}/${REPO_NAME}
+TRACKING_BRANCH=prow-job-tracking
+FILE_TO_PUSH=job/${JOB_NAME}
+
+cd ${PATH_SCRIPTS}
+./trigger-prow-job-from-git.sh -r ${TRACKING_REPO} \
+ -b ${TRACKING_BRANCH} -s ${PWD}/env/date.list -d ${FILE_TO_PUSH}
+
+if [[ $? -ne 0 ]]
+    echo "Failed to add the git commit to trigger the next job"
+    exit 2
 fi
