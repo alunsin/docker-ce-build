@@ -3,7 +3,7 @@
 # Usage: trigger-prow-job-from-git.sh -r ${TRACKING_REPO} -b ${TRACKING_BRANCH} -s ${SRC_FILE DEST_FILE} -d ${DEST_FILE DEST_FILE}
 ##
 
-set -eux
+set -eu
 
 display_usage() {
  echo "usage: -r <TRACKING_REPO> -b <TRACKING_BRANCH> -s <SRC_FILE> DEST_FILE} -d <DEST_FILE>}"
@@ -38,6 +38,7 @@ shift $((OPTIND-1))
 (($OPTIND == 9)) || display_usage
 
 
+set -x
 
 #JOB_TRACKING_DIR="/home/prow/go/src/github.com/${REPO_OWNER}/${REPO_NAME}_${TRACKING_BRANCH}"
 JOB_TRACKING_DIR="/tmp/${TRACKING_BRANCH}"
@@ -45,7 +46,7 @@ JOB_TRACKING_DIR="/tmp/${TRACKING_BRANCH}"
 mkdir -p ${JOB_TRACKING_DIR}
 pushd ${JOB_TRACKING_DIR}
 
-git init
+git init > /dev/null
 
 git config --global user.email "ppc64le@in.ibm.com"
 git config --global user.name "Runtime Team Jobs"
