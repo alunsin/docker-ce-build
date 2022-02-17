@@ -1,6 +1,10 @@
 #!/bin/bash
 ##
 # Usage: trigger-prow-job-from-git.sh -r ${TRACKING_REPO} -b ${TRACKING_BRANCH} -s ${SRC_FILE DEST_FILE} -d ${DEST_FILE DEST_FILE}
+#
+# *** Important ***
+#  Please make sure that the ssh key for the git push is configured
+#  and the github.com has been added to the ~/.ssh/known_hosts prior entering here
 ##
 
 set -eu
