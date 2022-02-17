@@ -41,7 +41,7 @@ shift $((OPTIND-1))
 
 (($OPTIND == 9)) || display_usage
 
-
+#Display every command from here
 set -x
 
 JOB_TRACKING_DIR="/tmp/${TRACKING_BRANCH}"
@@ -49,7 +49,7 @@ JOB_TRACKING_DIR="/tmp/${TRACKING_BRANCH}"
 mkdir -p ${JOB_TRACKING_DIR}
 pushd ${JOB_TRACKING_DIR}
 
-git init > /dev/null
+git init > /dev/null 2>&1
 
 git config --global user.email "ppc64le@in.ibm.com"
 git config --global user.name "Runtime Team Jobs"
