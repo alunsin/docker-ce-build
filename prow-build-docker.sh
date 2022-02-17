@@ -58,7 +58,8 @@ cd ${PATH_SCRIPTS}
 ./trigger-prow-job-from-git.sh -r ${TRACKING_REPO} \
  -b ${TRACKING_BRANCH} -s ${PWD}/env/date.list -d ${FILE_TO_PUSH}
 
-if [[ $? -ne 0 ]]
+if [ $? -ne 0 ]
+then
     echo "Failed to add the git commit to trigger the next job"
     exit 2
 fi
