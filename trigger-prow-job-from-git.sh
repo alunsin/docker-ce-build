@@ -3,7 +3,7 @@
 # Usage: trigger-prow-job-from-git.sh -r ${TRACKING_REPO} -b ${TRACKING_BRANCH} -s ${SRC_FILE DEST_FILE} -d ${DEST_FILE DEST_FILE}
 ##
 
-set -eu
+set -eux
 
 display_usage() {
  echo "usage: -r <TRACKING_REPO> -b <TRACKING_BRANCH> -s <SRC_FILE> DEST_FILE} -d <DEST_FILE>}"
