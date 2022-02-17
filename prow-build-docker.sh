@@ -30,8 +30,7 @@ source env.list
 
 # Build dynamic docker packages
 echo "*** Build ***"
-echo "DEV: disable build docker"
-#${PATH_SCRIPTS}/build-docker.sh
+${PATH_SCRIPTS}/build-docker.sh
 exit_code_build=$?
 echo "Exit code build : ${exit_code_build}"
 
