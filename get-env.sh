@@ -51,7 +51,7 @@ popd
 #echo RPMS=\"`cd docker-ce-packaging/rpm && ls -1d centos-* fedora-*`\" >> ${FILE_ENV}
 
 echo DEBS=\"ubuntu-bionic\" >> ${FILE_ENV}
-echo RPMS=\"centos-8 fedora-34\" >> ${FILE_ENV}
+echo RPMS=\"\" >> ${FILE_ENV}
 
 source /workspace/${FILE_ENV}
 
