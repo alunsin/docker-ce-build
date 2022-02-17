@@ -44,7 +44,6 @@ shift $((OPTIND-1))
 
 set -x
 
-#JOB_TRACKING_DIR="/home/prow/go/src/github.com/${REPO_OWNER}/${REPO_NAME}_${TRACKING_BRANCH}"
 JOB_TRACKING_DIR="/tmp/${TRACKING_BRANCH}"
 
 mkdir -p ${JOB_TRACKING_DIR}
