@@ -1,13 +1,25 @@
 #!/bin/bash
 DAEMON="dockerd"
 
+DIR_LOGS="/workspace/logs"
+DOCKERD_LOG="${DIR_LOGS}/dockerd.log"
+
 case "${1}" in
   start)
     # Call dockerd-entrypoint to start dockerd, then check that dockerd has started
 
-    # Start the docker daemon in the background
-    bash /usr/local/bin/dockerd-entrypoint.sh --mtu=1440 &
+    #
+    if ! test -d ${DIR_LOGS}
+    then
+      echo "Creating logging directory: ${DIR_LOGS}"
+      mkdir -p ${DIR_LOGS}
+    fi
 
+    # Start the docker daemon in the background
+    echo "Starting dockerd with '--mtu=1440' in order to be compatible with Calico on K8S"
+    bash /usr/local/bin/dockerd-entrypoint.sh --mtu=1440 > ${DOCKERD_LOG} 2>&1 &
+    echo "dockerd logs redirected to:${DOCKERD_LOG}"
+    
     # Check if dockerd has started
     while ! /usr/bin/pgrep ${DAEMON}
     do
