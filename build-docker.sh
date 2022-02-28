@@ -85,7 +85,15 @@ buildDocker() {
       echo "Docker for ${DISTRO} was not copied."
     fi
   else
-    echo "Docker for ${DISTRO} not built"
+    echo "ERROR: Docker for ${DISTRO} not built"
+
+    echo "== Copying log to ${DIR_LOGS_COS} =="
+    cp ${DIR_LOGS}/build_docker_${DISTRO}.log ${DIR_LOGS_COS}/build_docker_${DISTRO}.log
+
+    echo "== Log start for the build failure of ${DISTRO} =="
+    cat ${DIR_LOGS}/build_docker_${DISTRO}.log
+    echo "== Log end for the build failure of ${DISTRO} =="
+
   fi
 
   build_after=$SECONDS
