@@ -44,7 +44,7 @@ ls docker-ce-packaging/static/build/linux/tmp/*.tgz
 if [[ $? -ne 0 ]]
 then
   # No static binaries built
-  echo "Static binaries not built or not renamed"
+  echo "ERROR: Static binaries not built or not renamed"
   exit 1
 else
   # Static binaries built
@@ -52,7 +52,7 @@ else
   if [[ $? -ne 0 ]]
   then
     # Static binaries built but not renamed
-    echo "Static binaries built but not renamed"
+    echo "ERROR: Static binaries built but not renamed"
     exit 1
   fi
   # Static binaries built and renamed

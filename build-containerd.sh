@@ -45,7 +45,28 @@ buildContainerd() {
   DISTRO_NAME="$(cut -d'-' -f1 <<<"${DISTRO}")"
   DISTRO_VERS="$(cut -d'-' -f2 <<<"${DISTRO}")"
 
-  cd /workspace/containerd-packaging && make REF=${CONTAINERD_VERS} docker.io/library/${DISTRO_NAME}:${DISTRO_VERS} > ${DIR_LOGS}/build_containerd_${DISTRO}.log 2>&1
+  TARGET="docker.io/library/${DISTRO_NAME}:${DISTRO_VERS}"
+  if [[ "${DISTRO_NAME}:${DISTRO_VERS}" == centos:8* ]]
+	then
+    ##
+    # Switch to quay.io for CentOS 8 stream
+    # See https://github.com/docker/containerd-packaging/pull/263
+    ##
+    echo "Switching to CentOS 8 stream and using quay.io"
+
+    TARGET="quay.io/centos/centos:stream8"
+  fi
+
+  echo "Calling make REF=${CONTAINERD_VERS} ${TARGET}"
+  cd /workspace/containerd-packaging &&\
+   make REF=${CONTAINERD_VERS} ${TARGET} > ${DIR_LOGS}/build_containerd_${DISTRO}.log 2>&1
+
+  RET=$?
+  if [[ $RET -ne 0 ]]
+	then
+	    # The Dockerfile and/or the test_launch.sh is/are missing
+	    echo "ERROR: the make command terminated with exit code:$RET"
+  fi
 
   # Check if the dynamic containerd package has been built
   if test -d build/${DISTRO_NAME}/${DISTRO_VERS}
@@ -71,7 +92,14 @@ buildContainerd() {
       echo "Containerd for ${DISTRO} was not copied."
     fi
   else
-    echo "Containerd for ${DISTRO} not built"
+    echo " ERROR: Containerd for ${DISTRO} not built"
+
+    echo "== Copying log to ${DIR_LOGS_COS} =="
+    cp ${DIR_LOGS}/build_containerd_${DISTRO}.log ${DIR_LOGS_COS}/build_containerd_${DISTRO}.log
+
+    echo "== Log start for the build failure of ${DISTRO} =="
+    cat ${DIR_LOGS}/build_containerd_${DISTRO}.log
+    echo "== Log end for the build failure of ${DISTRO} =="
   fi
   build_after=$SECONDS
   build_duration=$(expr $build_after - $build_before) && echo "DURATION BUILD containerd ${DISTRO} : $(($build_duration / 60)) minutes and $(($build_duration % 60)) seconds elapsed."

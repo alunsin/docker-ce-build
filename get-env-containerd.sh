@@ -37,6 +37,11 @@ fi
 mkdir -p ${PATH_DOCKERTEST}
 cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/dockertest ${PATH_DOCKERTEST}/dockertest
 
+#Patch test for centos so that its use centos 7 instead of centos 8 (EOL)
+# See https://github.com/docker-library/official-images/pull/11831
+echo "Temporary fix: patching test suite to use centos 7"
+sed -i 's/Centos="latest"/Centos="centos7"/g' ${PATH_DOCKERTEST}/dockertest/version/version.go
+
 # Get the docker-ce packages
 mkdir /workspace/docker-ce-${DOCKER_VERS}_${DATE}
 cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/build-docker-${DOCKER_VERS}_${DATE}/docker-ce-${DOCKER_VERS}/* /workspace/docker-ce-${DOCKER_VERS}_${DATE}
