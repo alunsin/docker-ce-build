@@ -85,8 +85,9 @@ buildContainerd() {
     cp ${DIR_LOGS}/build_containerd_${DISTRO}.log ${DIR_LOGS_COS}/build_containerd_${DISTRO}.log
 
     # Checking everything has been copied
-    if  !test -d ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS} ||
-        || !test -d ${DIR_CONTAINERD_COS}/${DISTRO_NAME}/${DISTRO_VERS}
+    if [[ ! -d ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS} || \
+          ! -d ${DIR_CONTAINERD_COS}/${DISTRO_NAME}/${DISTRO_VERS} ]]
+    then
       echo "ERROR: Containerd for ${DISTRO} was not copied."
     fi
 
