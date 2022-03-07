@@ -50,14 +50,6 @@ popd
 echo DEBS=\"`cd docker-ce-packaging/deb && ls -1d debian-* ubuntu-*`\" >> ${FILE_ENV}
 echo RPMS=\"`cd docker-ce-packaging/rpm && ls -1d centos-* fedora-*`\" >> ${FILE_ENV}
 
-echo ""
-echo "*************************"
-echo "*DEV: Only build centos**"
-echo "*************************"
-echo ""
-echo DEBS=\"\" >> ${FILE_ENV}
-echo RPMS=\"centos-7 centos-8\" >> ${FILE_ENV}
-
 #echo DEBS=\"ubuntu-bionic\" >> ${FILE_ENV}
 #echo RPMS=\"centos-8 fedora-34\" >> ${FILE_ENV}
 
