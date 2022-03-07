@@ -85,14 +85,13 @@ buildContainerd() {
     cp ${DIR_LOGS}/build_containerd_${DISTRO}.log ${DIR_LOGS_COS}/build_containerd_${DISTRO}.log
 
     # Checking everything has been copied
-    if test -d ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS} && test -d ${DIR_CONTAINERD_COS}/${DISTRO_NAME}/${DISTRO_VERS}
-    then
-      echo "Containerd for ${DISTRO} was copied."
-    else
-      echo "Containerd for ${DISTRO} was not copied."
+    if  !test -d ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS} ||
+        || !test -d ${DIR_CONTAINERD_COS}/${DISTRO_NAME}/${DISTRO_VERS}
+      echo "ERROR: Containerd for ${DISTRO} was not copied."
     fi
+
   else
-    echo " ERROR: Containerd for ${DISTRO} not built"
+    echo "ERROR: Containerd for ${DISTRO} not built"
 
     echo "== Copying log to ${DIR_LOGS_COS} =="
     cp ${DIR_LOGS}/build_containerd_${DISTRO}.log ${DIR_LOGS_COS}/build_containerd_${DISTRO}.log
@@ -102,7 +101,8 @@ buildContainerd() {
     echo "== Log end for the build failure of ${DISTRO} =="
   fi
   build_after=$SECONDS
-  build_duration=$(expr $build_after - $build_before) && echo "DURATION BUILD containerd ${DISTRO} : $(($build_duration / 60)) minutes and $(($build_duration % 60)) seconds elapsed."
+  build_duration=$(expr $build_after - $build_before) \
+    && echo "DURATION BUILD containerd ${DISTRO} : $(($build_duration / 60)) minutes and $(($build_duration % 60)) seconds elapsed."
 }
 
 if [[ ${CONTAINERD_BUILD} != "0" ]]
