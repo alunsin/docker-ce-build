@@ -55,8 +55,8 @@ echo "*************************"
 echo "*DEV: Only build centos**"
 echo "*************************"
 echo ""
-DEBS="" >> ${FILE_ENV}
-RPMS="centos-7 centos-8" >> ${FILE_ENV}
+echo DEBS=\"\" >> ${FILE_ENV}
+echo RPMS=\"centos-7 centos-8\" >> ${FILE_ENV}
 
 #echo DEBS=\"ubuntu-bionic\" >> ${FILE_ENV}
 #echo RPMS=\"centos-8 fedora-34\" >> ${FILE_ENV}
