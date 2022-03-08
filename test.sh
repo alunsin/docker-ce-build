@@ -95,15 +95,29 @@ do
     if [[ $? -ne 0 ]]
     then
       # The docker-ce packages and/or the containerd packages and/or the Dockerfile is/are missing
-      echo "The docker-ce packages and/or the containerd packages and/or the Dockerfile is/are missing"
+      echo "ERROR: The docker-ce packages and/or the containerd packages and/or the Dockerfile is/are missing"
     else
-      # Building the test image
       echo "### # Building the test image: ${IMAGE_NAME} # ###"
+      # Building the test image
+        if [[ "${DISTRO_NAME}:${DISTRO_VERS}" == centos:8* ]]
+        then
+          ##
+          # Switch to quay.io for CentOS 8 stream
+          # See https://github.com/docker/containerd-packaging/pull/263
+          # See https://github.com/docker-library/official-images/pull/11831
+          ##
+          echo "Temporary fix: patching Dockerfile for using CentOS 8 stream and quay.io "
+          sed -i 's/FROM ppc64le.*/FROM quay.io\/centos\/centos\:stream8/g' Dockerfile
+        fi
+
       docker build -t ${IMAGE_NAME} --build-arg DISTRO_NAME=${DISTRO_NAME} --build-arg DISTRO_VERS=${DISTRO_VERS} . > ${DIR_TEST}/${BUILD_LOG} 2>&1
 
       if [[ $? -ne 0 ]]
       then
         echo "ERROR: docker build failed for ${DISTRO}, see details from '${BUILD_LOG}'"
+        echo "== Log start for the docker build failure of ${DISTRO} =="
+        cat ${DIR_TEST}/${BUILD_LOG}
+        echo "== Log end for the docker build failure of ${DISTRO} =="
       else
         echo "Docker build for ${DISTRO} done"
       fi
@@ -127,11 +141,14 @@ do
       fi
 
       status_code="$(docker container wait $CONT_NAME)"
+      docker logs $CONT_NAME > ${DIR_TEST}/${TEST_LOG} 2>&1
+
       if [[ ${status_code} -ne 0 ]]; then
         echo "ERROR: The test suite failed for ${DISTRO}. See details from '${TEST_LOG}'"
-        docker logs $CONT_NAME > ${DIR_TEST}/${TEST_LOG} 2>&1
+        echo "== Log start for the test failure of ${DISTRO} =="
+        cat ${DIR_TEST}/${TEST_LOG}
+        echo "== Log end for the test failure of ${DISTRO} =="
       else
-        docker logs $CONT_NAME > ${DIR_TEST}/${TEST_LOG} 2>&1
         echo "Tests done"
       fi
 
