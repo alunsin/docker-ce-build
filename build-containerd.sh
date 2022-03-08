@@ -76,10 +76,18 @@ buildContainerd() {
     echo "== Copying packages to ${DIR_CONTAINERD} =="
     checkDirectory ${DIR_CONTAINERD}/${DISTRO_NAME}
     cp -r build/${DISTRO_NAME}/${DISTRO_VERS} ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}
+    
+    echo "== DEBUG: List of copied files =="
+    find ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}
 
     echo "=== Copying packages to ${DIR_CONTAINERD_COS} ==="
     checkDirectory ${DIR_CONTAINERD_COS}/${DISTRO_NAME}
     cp -r build/${DISTRO_NAME}/${DISTRO_VERS} ${DIR_CONTAINERD_COS}/${DISTRO_NAME}/${DISTRO_VERS}
+
+    echo "== DEBUG: List of copied files =="
+    find ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}
+    
+
 
     echo "==== Copying log to ${DIR_LOGS_COS} ===="
     cp ${DIR_LOGS}/build_containerd_${DISTRO}.log ${DIR_LOGS_COS}/build_containerd_${DISTRO}.log
