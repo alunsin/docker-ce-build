@@ -63,37 +63,50 @@ do
 	    continue
 	else
 	    # Building the test image
-            echo "### ## Building the test image: ${IMAGE_NAME} ## ###" 2>&1 | tee -a ${LOG}
-            docker build -t ${IMAGE_NAME} --build-arg DISTRO_NAME=${DISTRO_NAME} --build-arg DISTRO_VERS=${DISTRO_VERS} . 2>&1 | tee ${DIR_TEST}/${BUILD_LOG}
 
-            if [[ $? -ne 0 ]]; then
-                echo "ERROR: docker build failed for ${DISTRO}, see details from '${BUILD_LOG}'" 2>&1 | tee -a ${LOG}
-                continue
-            else
-                echo "Docker build for ${DISTRO} done" 2>&1 | tee -a ${LOG}
-            fi
+        echo "### # Building the test image: ${IMAGE_NAME} # ###"
+        # Building the test image
+        if [[ "${DISTRO_NAME}:${DISTRO_VERS}" == centos:8* ]]
+        then
+        ##
+        # Switch to quay.io for CentOS 8 stream
+        # See https://github.com/docker/containerd-packaging/pull/263
+        # See https://github.com/docker-library/official-images/pull/11831
+        ##
+        echo "Temporary fix: patching Dockerfile for using CentOS 8 stream and quay.io "
+        sed -i 's/FROM ppc64le.*/FROM quay.io\/centos\/centos\:stream8/g' Dockerfile
+        fi
 
-            echo "### ### Running the tests from the container: ${CONT_NAME} ### ###" 2>&1 | tee -a ${LOG}
-            if [[ ! -z ${DOCKER_SECRET_AUTH+z} ]]
-            then
-                docker run -d -v /workspace:/workspace -v ${PATH_SCRIPTS}:${PATH_SCRIPTS} --env DOCKER_SECRET_AUTH --env DISTRO_NAME --env DISTRO_VERS --env PATH_SCRIPTS --env DIR_TEST --env LOG --privileged --name ${CONT_NAME} ${IMAGE_NAME}
-            else
-                docker run -d -v /workspace:/workspace -v ${PATH_SCRIPTS}:${PATH_SCRIPTS} --env DISTRO_NAME --env DISTRO_VERS --env PATH_SCRIPTS --env DIR_TEST --env LOG --privileged --name ${CONT_NAME} ${IMAGE_NAME}
-            fi
+        docker build -t ${IMAGE_NAME} --build-arg DISTRO_NAME=${DISTRO_NAME} --build-arg DISTRO_VERS=${DISTRO_VERS} . 2>&1 | tee ${DIR_TEST}/${BUILD_LOG}
 
-	    status_code="$(docker container wait $CONT_NAME)"
-            if [[ ${status_code} -ne 0 ]]; then
-                echo "ERROR: The test suite failed for ${DISTRO}. See details from '${TEST_LOG}'" 2>&1 | tee -a ${LOG}
-                docker logs $CONT_NAME 2>&1 | tee ${DIR_TEST}/${TEST_LOG}
-            else
-                docker logs $CONT_NAME 2>&1 | tee ${DIR_TEST}/${TEST_LOG}
-                echo "Tests done" 2>&1 | tee -a ${LOG}
-            fi
+        if [[ $? -ne 0 ]]; then
+            echo "ERROR: docker build failed for ${DISTRO}, see details from '${BUILD_LOG}'" 2>&1 | tee -a ${LOG}
+            continue
+        else
+            echo "Docker build for ${DISTRO} done" 2>&1 | tee -a ${LOG}
+        fi
 
-            echo "### ### # Cleanup: ${CONT_NAME} # ### ###"
-            docker stop ${CONT_NAME}
-            docker rm ${CONT_NAME}
-            docker image rm ${IMAGE_NAME}
+        echo "### ### Running the tests from the container: ${CONT_NAME} ### ###" 2>&1 | tee -a ${LOG}
+        if [[ ! -z ${DOCKER_SECRET_AUTH+z} ]]
+        then
+            docker run -d -v /workspace:/workspace -v ${PATH_SCRIPTS}:${PATH_SCRIPTS} --env DOCKER_SECRET_AUTH --env DISTRO_NAME --env DISTRO_VERS --env PATH_SCRIPTS --env DIR_TEST --env LOG --privileged --name ${CONT_NAME} ${IMAGE_NAME}
+        else
+            docker run -d -v /workspace:/workspace -v ${PATH_SCRIPTS}:${PATH_SCRIPTS} --env DISTRO_NAME --env DISTRO_VERS --env PATH_SCRIPTS --env DIR_TEST --env LOG --privileged --name ${CONT_NAME} ${IMAGE_NAME}
+        fi
+
+    status_code="$(docker container wait $CONT_NAME)"
+        if [[ ${status_code} -ne 0 ]]; then
+            echo "ERROR: The test suite failed for ${DISTRO}. See details from '${TEST_LOG}'" 2>&1 | tee -a ${LOG}
+            docker logs $CONT_NAME 2>&1 | tee ${DIR_TEST}/${TEST_LOG}
+        else
+            docker logs $CONT_NAME 2>&1 | tee ${DIR_TEST}/${TEST_LOG}
+            echo "Tests done" 2>&1 | tee -a ${LOG}
+        fi
+
+        echo "### ### # Cleanup: ${CONT_NAME} # ### ###"
+        docker stop ${CONT_NAME}
+        docker rm ${CONT_NAME}
+        docker image rm ${IMAGE_NAME}
 	fi
 	popd
         rm -rf tmp
