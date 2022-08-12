@@ -5,14 +5,15 @@ set -x
 
 ##
 # Set the test mode:
+# - local, test with packages from COS bucket
 # - staging, test from the docker's staging download website
 # - release, form docker's official public download website
 ##
 TEST_MODE="${1:-staging}"
 
 echo "TEST_MODE=${TEST_MODE}"
-if [[ "$TEST_MODE" != "staging" && "$TEST_MODE" != "release" ]]; then
-    echo "Usage: staging | release"
+if [[ "$TEST_MODE" != "local" && "$TEST_MODE" != "staging" && "$TEST_MODE" != "release" ]]; then
+    echo "Usage: local | staging | release"
     exit 2
 fi
 
