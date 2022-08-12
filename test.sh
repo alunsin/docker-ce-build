@@ -450,6 +450,7 @@ while true
 do
   while [ $n -lt $max ] && [ $i -lt ${nD} ]
   do
+    echo "DEBUG testDynamicPackages ${Dis[i]} ${Pac[i]} "
     testDynamicPackages ${Dis[i]} ${Pac[i]} &
     pids+=( $! )
     echo "Test distrib: i:$i ${Dis[i]} pid:${pids[i]}"
