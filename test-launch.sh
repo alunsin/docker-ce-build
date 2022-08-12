@@ -21,6 +21,9 @@ export GO111MODULE=auto
 cd /workspace/test/src/github.ibm.com/powercloud/dockertest
 go install gotest.tools/gotestsum@v1.7.0
 
+echo "* Go version:"
+go version
+
 if [[ ${DISTRO_NAME} == "alpine" ]]
 then
   gotestsum --format standard-verbose --junitfile ${DIR_TEST}/junit-tests-${DISTRO_NAME}.xml --debug -- ./tests/${DISTRO_NAME}
