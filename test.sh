@@ -371,6 +371,13 @@ checkFile ${PATH_ERRORS}
 PATH_ERRORS_COS="${DIR_TEST_COS}/${FILE_ERRORS}"
 
 ##
+# DEBUG dump packages from /workspace
+##
+set -x
+find $DIR_DOCKER -type f
+find $DIR_CONTAINERD -type f
+
+##
 # Set the test mode:
 # - local (default), test from locally built packages
 # - staging, test from the docker's staging download website
