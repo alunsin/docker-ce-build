@@ -459,6 +459,7 @@ do
   do
     echo "DEBUG: Disable parallel call for testDynamicPackages ${Dis[i]} ${Pac[i]} "
     #testDynamicPackages ${Dis[i]} ${Pac[i]} &
+    pwd &
     testDynamicPackages ${Dis[i]} ${Pac[i]}
     pids+=( $! )
     echo "Test distrib: i:$i ${Dis[i]} pid:${pids[i]}"
