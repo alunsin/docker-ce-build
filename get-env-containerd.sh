@@ -51,7 +51,7 @@ if [[ ${CONTAINERD_BUILD} = "0" ]]
 then
     echo "CONTAINERD_BUILD is set to 0, we copy the containerd packages from the COS bucket"
     mkdir /workspace/containerd-${CONTAINERD_REF}_${DATE}
-    cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/containerd-${CONTAINERD_REF/* /workspace/containerd-${CONTAINERD_REF}_${DATE}
+    cp -r ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}/prow-docker/containerd-${CONTAINERD_REF}/* /workspace/containerd-${CONTAINERD_REF}_${DATE}
 else
     echo "CONTAINERD_BUILD is set to 1"
 fi
