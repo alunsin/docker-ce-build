@@ -63,6 +63,9 @@ testDynamicPackages() {
   pushd tmp-${DISTRO}
 
   cp ${PATH_DOCKERFILE}-${PACKTYPE}/Dockerfile .
+  touch Dockerfile
+  PWD=`pwd`
+  echo "Debug: Touching $PWD/Dockerfile"
   cp ${PATH_SCRIPTS}/test-launch.sh .
 
   ###
@@ -457,10 +460,10 @@ while true
 do
   while [ $n -lt $max ] && [ $i -lt ${nD} ]
   do
-    echo "DEBUG: Disable parallel call for testDynamicPackages ${Dis[i]} ${Pac[i]} "
+    #echo "DEBUG: Disable parallel call for testDynamicPackages ${Dis[i]} ${Pac[i]} "
     #testDynamicPackages ${Dis[i]} ${Pac[i]} &
-    pwd &
-    testDynamicPackages ${Dis[i]} ${Pac[i]}
+    #pwd &
+    testDynamicPackages ${Dis[i]} ${Pac[i]} &
     pids+=( $! )
     echo "Test distrib: i:$i ${Dis[i]} pid:${pids[i]}"
     let "n=n+1"
