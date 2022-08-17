@@ -63,9 +63,9 @@ testDynamicPackages() {
   pushd tmp-${DISTRO}
 
   cp ${PATH_DOCKERFILE}-${PACKTYPE}/Dockerfile .
-  touch Dockerfile
-  PWD=`pwd`
-  echo "Debug: Touching $PWD/Dockerfile"
+  #touch Dockerfile
+  #PWD=`pwd`
+  #echo "Debug: Touching $PWD/Dockerfile"
   cp ${PATH_SCRIPTS}/test-launch.sh .
 
   ###
