@@ -54,6 +54,17 @@ patchDockerFiles() {
   done
 }
 
+##
+# Patch GO image so that we use bullseye instead of buster which is EOL
+# For instance the golang:1.18.6-buster is only supported for x86
+##
+patchGoVersion() {
+  MKFILE_PATH=$1/Makefile
+
+  echo "Patching GO image from buster to bullseye for $MKFILE_PATH"
+  sed -ri  's/GO_VERSION\)\-buster/GO_VERSION\)\-bullseye/' $MKFILE_PATH
+}
+
 # Function to build docker packages
 # $1 : distro
 # $2 : DEBS or RPMS
@@ -110,6 +121,9 @@ patchDockerFiles .
 cd /workspace/docker-ce-packaging/rpm
 patchDockerFiles .
 cd /workspace
+
+patchGoVersion /workspace/docker-ce-packaging/deb
+patchGoVersion /workspace/docker-ce-packaging/rpm
 
 before=$SECONDS
 # 1) Build the list of distros
