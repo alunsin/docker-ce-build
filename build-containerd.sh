@@ -81,12 +81,6 @@ buildContainerd() {
     MAKE_OPTS+=" GOLANG_VERSION=${CONTAINERD_GO_VERSION}"
   fi
 
-  if [[ ! -z "${CONTAINERD_RUNC_REF}" ]]
-  then
-    MAKE_OPTS+=" RUNC_REF=${CONTAINERD_RUNC_REF}"
-    export RUNC_REF=${CONTAINERD_RUNC_REF}
-  fi
-
   echo "Calling make ${MAKE_OPTS} ${TARGET}"
   cd /workspace/containerd-packaging-${DISTRO} && \
     make ${MAKE_OPTS} ${TARGET} > ${DIR_LOGS}/build_containerd_${DISTRO}.log 2>&1
@@ -146,6 +140,12 @@ then
   git remote add origin https://github.com/docker/containerd-packaging.git
   git fetch origin ${CONTAINERD_PACKAGING_REF}
   git checkout FETCH_HEAD
+
+
+  if [[ ! -z "${CONTAINERD_RUNC_REF}" ]]
+  then
+    export RUNC_REF=${CONTAINERD_RUNC_REF}
+  fi
 
   make REF=${CONTAINERD_REF} checkout
 fi
