@@ -84,6 +84,7 @@ buildContainerd() {
   if [[ ! -z "${CONTAINERD_RUNC_REF}" ]]
   then
     MAKE_OPTS+=" RUNC_REF=${CONTAINERD_RUNC_REF}"
+    export RUNC_REF=${CONTAINERD_RUNC_REF}
   fi
 
   echo "Calling make ${MAKE_OPTS} ${TARGET}"
